@@ -1,572 +1,151 @@
-<!doctype html>
+<!DOCTYPE html>
 <html lang="en">
 <head>
-<meta charset="utf-8" />
-<meta name="viewport" content="width=device-width,initial-scale=1" />
-<title>Unit Admin Monitor — PWA</title>
-<link rel="manifest" href="manifest.json" />
-<meta name="theme-color" content="#0b5fff"/>
-<style>
-  :root{
-    --bg:#f6f8fb; --card:#ffffff; --muted:#6b7280; --accent:#0b5fff;
-    --success:#10b981; --danger:#ef4444;
-    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial;
-  }
-  html,body{height:100%;margin:0;background:var(--bg);color:#0b1220}
-  .app{max-width:1100px;margin:0 auto;padding:16px}
-  header{display:flex;align-items:center;gap:12px;margin-bottom:12px}
-  header h1{font-size:18px;margin:0}
-  .top-actions{margin-left:auto;display:flex;gap:8px}
-  .card{background:var(--card);border-radius:10px;padding:12px;box-shadow:0 1px 3px rgba(15,23,42,0.05);margin-bottom:12px}
-  .grid{display:grid;grid-template-columns:1fr;gap:12px}
-  @media(min-width:900px){.grid{grid-template-columns: 1fr 360px}}
-  input,textarea,select,button{font:inherit}
-  .controls{display:flex;gap:8px;flex-wrap:wrap}
-  .btn{background:var(--accent);color:white;border:none;padding:8px 10px;border-radius:8px;cursor:pointer}
-  .btn.ghost{background:transparent;color:var(--accent);border:1px solid rgba(11,95,255,0.12)}
-  .small{padding:6px 8px;font-size:13px;border-radius:7px}
-  .list-item{display:flex;align-items:center;justify-content:space-between;padding:10px;border-radius:8px;border:1px solid rgba(2,6,23,0.04);margin-bottom:8px}
-  .meta{color:var(--muted);font-size:13px}
-  .pill{background:rgba(11,95,255,0.08);color:var(--accent);padding:6px 8px;border-radius:999px;font-weight:600}
-  label{display:block;font-size:13px;margin-bottom:6px}
-  form .row{display:flex;gap:8px;flex-wrap:wrap}
-  .field{flex:1;min-width:120px}
-  .file-list{max-height:120px;overflow:auto}
-  footer{font-size:12px;color:var(--muted);text-align:center;margin-top:8px}
-  /* touch targets */
-  button, .btn { -webkit-tap-highlight-color: rgba(0,0,0,0.1); }
-  .status-dot{display:inline-block;width:10px;height:10px;border-radius:50%;margin-right:8px;vertical-align:middle}
-  .status-todo{background:#f59e0b}
-  .status-complete{background:var(--success)}
-  .controls-vert{display:flex;flex-direction:column;gap:8px}
-  .search{display:flex;gap:8px;align-items:center}
-  .small-muted{font-size:12px;color:var(--muted)}
-  .danger{color:var(--danger)}
-</style>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Unit Admin Monitor</title>
+  <link rel="manifest" href="manifest.json">
+  <script>
+    // Register service worker for offline use
+    if ('serviceWorker' in navigator) {
+      window.addEventListener('load', () => {
+        navigator.serviceWorker.register('sw.js')
+          .then(() => console.log('Service Worker Registered'));
+      });
+    }
+  </script>
+  <style>
+    body {
+      font-family: system-ui, sans-serif;
+      margin: 0;
+      padding: 0;
+      background: #f5f6fa;
+      color: #333;
+    }
+    header {
+      background: #004aad;
+      color: white;
+      text-align: center;
+      padding: 1em;
+      font-size: 1.2em;
+    }
+    main {
+      padding: 1em;
+    }
+    h2 {
+      border-bottom: 2px solid #004aad;
+      padding-bottom: 0.3em;
+    }
+    section {
+      background: white;
+      padding: 1em;
+      margin-bottom: 1em;
+      border-radius: 8px;
+      box-shadow: 0 0 5px rgba(0,0,0,0.1);
+    }
+    input, textarea, button {
+      width: 100%;
+      padding: 8px;
+      margin: 4px 0;
+      font-size: 1em;
+    }
+    button {
+      background: #004aad;
+      color: white;
+      border: none;
+      border-radius: 5px;
+    }
+    button:hover {
+      background: #00337a;
+    }
+  </style>
 </head>
 <body>
-<div class="app">
-  <header>
-    <div style="display:flex;gap:10px;align-items:center">
-      <svg width=36 height=36 viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg"><rect width=24 height=24 rx=6 fill="#0b5fff"/><path d="M6 9h12M6 13h9" stroke="#fff" stroke-width=1.5 stroke-linecap="round" stroke-linejoin="round"/></svg>
-      <div>
-        <h1>Unit Admin Monitor</h1>
-        <div class="small-muted">Tasks • Announcements • Documents • Logs (offline & online)</div>
-      </div>
-    </div>
+  <header>📋 Unit Office Admin Monitor</header>
 
-    <div class="top-actions">
-      <div class="search card" style="display:flex;align-items:center;padding:8px 10px">
-        <input id="globalSearch" placeholder="Search tasks, staff, announcements..." style="border:0;background:transparent;outline:none;width:220px" />
-        <button id="btnExport" class="btn small">Export</button>
-        <button id="btnImport" class="btn ghost small">Import</button>
-      </div>
-      <button id="installBtn" class="btn small">Install App</button>
-    </div>
-  </header>
-
-  <main class="grid">
-    <!-- left column -->
+  <main>
     <section>
-      <div class="card">
-        <div style="display:flex;align-items:center;justify-content:space-between">
-          <strong>New Task</strong>
-          <div class="small-muted">Assign tasks & track status</div>
-        </div>
-        <form id="taskForm" style="margin-top:10px">
-          <label>Title<input id="taskTitle" required/></label>
-          <label>Description<textarea id="taskDesc" rows=2></textarea></label>
-          <div class="row">
-            <div class="field">
-              <label>Assignee<select id="taskAssignee"></select></label>
-            </div>
-            <div class="field">
-              <label>Due Date<input id="taskDue" type="date"></label>
-            </div>
-            <div style="width:120px">
-              <label>Status<select id="taskStatus"><option value="todo">To do</option><option value="inprogress">In progress</option><option value="done">Done</option></select></label>
-            </div>
-          </div>
-          <div style="display:flex;gap:8px;margin-top:8px">
-            <button class="btn" type="submit">Add / Update</button>
-            <button id="clearTask" type="button" class="btn ghost">Clear</button>
-          </div>
-        </form>
-      </div>
-
-      <div class="card">
-        <div style="display:flex;align-items:center;justify-content:space-between">
-          <strong>Tasks</strong>
-          <div class="small-muted" id="taskCount">0</div>
-        </div>
-        <div style="margin-top:10px" id="tasksList"></div>
-      </div>
-
-      <div class="card">
-        <div style="display:flex;align-items:center;justify-content:space-between">
-          <strong>Announcements</strong>
-          <button id="newAnnBtn" class="btn small">New</button>
-        </div>
-        <div id="annList" style="margin-top:10px"></div>
-      </div>
+      <h2>Staff Records</h2>
+      <input type="text" id="staffName" placeholder="Staff Name">
+      <input type="text" id="staffRole" placeholder="Role/Position">
+      <button onclick="addStaff()">Add Staff</button>
+      <ul id="staffList"></ul>
     </section>
 
-    <!-- right column -->
-    <aside>
-      <div class="card">
-        <div style="display:flex;align-items:center;justify-content:space-between">
-          <strong>Staff Directory</strong>
-          <button id="addStaffBtn" class="btn small">Add</button>
-        </div>
-        <div id="staffList" style="margin-top:10px"></div>
-      </div>
+    <section>
+      <h2>Task Tracker</h2>
+      <input type="text" id="taskTitle" placeholder="Task Title">
+      <textarea id="taskDetails" placeholder="Task Details"></textarea>
+      <button onclick="addTask()">Add Task</button>
+      <ul id="taskList"></ul>
+    </section>
 
-      <div class="card">
-        <div style="display:flex;align-items:center;justify-content:space-between">
-          <strong>Documents</strong>
-          <div>
-            <input id="docFile" type="file" style="display:none" />
-            <button id="uploadDoc" class="btn small">Upload</button>
-          </div>
-        </div>
-        <div class="file-list" id="docList" style="margin-top:10px"></div>
-      </div>
-
-      <div class="card">
-        <div style="display:flex;align-items:center;justify-content:space-between">
-          <strong>Sync & Backup</strong>
-          <div class="small-muted">Online sync optional</div>
-        </div>
-        <div style="margin-top:8px;display:flex;flex-direction:column;gap:8px">
-          <button id="btnSync" class="btn small">Sync (if online)</button>
-          <button id="btnClearAll" class="btn ghost small danger">Clear Local Data</button>
-          <div class="small-muted">Export/import JSON or connect a sync endpoint.</div>
-        </div>
-      </div>
-    </aside>
+    <section>
+      <h2>Admin Notes</h2>
+      <textarea id="noteText" placeholder="Write note here..."></textarea>
+      <button onclick="saveNote()">Save Note</button>
+      <div id="savedNotes"></div>
+    </section>
   </main>
 
-  <footer class="small-muted">Built for mobile/iPad. Works offline (PWA). Keep receipts for large attachments. Version 1.0</footer>
-</div>
-
-<!-- Modal templates (simple prompt-based) -->
-<script>
-/* ===========================
-   Simple IndexedDB wrapper
-   =========================== */
-const DB_NAME = 'unit-admin-db';
-const DB_VERSION = 1;
-let db;
-
-function openDb(){
-  return new Promise((resolve,reject)=>{
-    const r = indexedDB.open(DB_NAME, DB_VERSION);
-    r.onupgradeneeded = e => {
-      db = e.target.result;
-      if(!db.objectStoreNames.contains('tasks')) db.createObjectStore('tasks',{keyPath:'id'});
-      if(!db.objectStoreNames.contains('staff')) db.createObjectStore('staff',{keyPath:'id'});
-      if(!db.objectStoreNames.contains('ann')) db.createObjectStore('ann',{keyPath:'id'});
-      if(!db.objectStoreNames.contains('docs')) db.createObjectStore('docs',{keyPath:'id'});
-      if(!db.objectStoreNames.contains('meta')) db.createObjectStore('meta',{keyPath:'k'});
+  <script>
+    function addStaff() {
+      const name = document.getElementById('staffName').value;
+      const role = document.getElementById('staffRole').value;
+      if (name && role) {
+        const li = document.createElement('li');
+        li.textContent = `${name} — ${role}`;
+        document.getElementById('staffList').appendChild(li);
+        document.getElementById('staffName').value = '';
+        document.getElementById('staffRole').value = '';
+        saveData();
+      }
     }
-    r.onsuccess = e => { db = e.target.result; resolve(db); };
-    r.onerror = e => reject(e);
-  });
-}
 
-function tx(store, mode='readonly'){
-  return db.transaction(store, mode).objectStore(store);
-}
-
-function put(storeName, obj){
-  return new Promise((res,rej)=>{
-    const store = db.transaction(storeName,'readwrite').objectStore(storeName);
-    const req = store.put(obj);
-    req.onsuccess = ()=>res(req.result);
-    req.onerror = e=>rej(e);
-  });
-}
-function getAll(storeName){
-  return new Promise((res,rej)=>{
-    const store = db.transaction(storeName,'readonly').objectStore(storeName);
-    const arr = [];
-    const cursor = store.openCursor();
-    cursor.onsuccess = e => {
-      const c = e.target.result;
-      if(c){ arr.push(c.value); c.continue(); } else res(arr);
-    };
-    cursor.onerror = e => rej(e);
-  });
-}
-function getOne(storeName, key){
-  return new Promise((res,rej)=>{
-    const req = db.transaction(storeName,'readonly').objectStore(storeName).get(key);
-    req.onsuccess = ()=>res(req.result);
-    req.onerror = e=>rej(e);
-  });
-}
-function del(storeName, key){
-  return new Promise((res,rej)=>{
-    const req = db.transaction(storeName,'readwrite').objectStore(storeName).delete(key);
-    req.onsuccess = ()=>res();
-    req.onerror = e=>rej(e);
-  });
-}
-function clearStore(storeName){
-  return new Promise((res,rej)=>{
-    const req = db.transaction(storeName,'readwrite').objectStore(storeName).clear();
-    req.onsuccess = ()=>res();
-    req.onerror = e=>rej(e);
-  });
-}
-
-/* ===========================
-   Helpers
-   =========================== */
-const uid = ()=>Date.now().toString(36)+'-'+Math.random().toString(36).slice(2,7);
-const el = id=>document.getElementById(id);
-function formatDate(d){
-  if(!d) return '';
-  const dt = new Date(d);
-  return dt.toLocaleDateString();
-}
-
-/* ===========================
-   App state and rendering
-   =========================== */
-async function renderAll(){
-  const tasks = await getAll('tasks');
-  const staff = await getAll('staff');
-  const anns = await getAll('ann');
-  const docs = await getAll('docs');
-
-  // populate assignee select
-  const sel = el('taskAssignee');
-  sel.innerHTML = '<option value="">— Unassigned —</option>';
-  staff.forEach(s=> sel.insertAdjacentHTML('beforeend', `<option value="${s.id}">${s.name}</option>`));
-
-  // tasks
-  const tasksList = el('tasksList'); tasksList.innerHTML = '';
-  const sorted = tasks.sort((a,b)=> (a.due||0)-(b.due||0));
-  el('taskCount').textContent = sorted.length;
-  sorted.forEach(t=>{
-    const assignee = staff.find(s=>s.id===t.assignee);
-    tasksList.insertAdjacentHTML('beforeend', `
-      <div class="list-item" data-id="${t.id}">
-        <div style="flex:1">
-          <div style="display:flex;align-items:center;gap:8px">
-            <span class="status-dot ${t.status==='done'?'status-complete':'status-todo'}"></span>
-            <div>
-              <div style="font-weight:600">${t.title}</div>
-              <div class="meta">${t.desc||''} ${t.due? ' • due ' + formatDate(t.due):''}</div>
-              <div class="small-muted">Assignee: ${assignee?assignee.name:'—'}</div>
-            </div>
-          </div>
-        </div>
-        <div style="display:flex;flex-direction:column;gap:6px;margin-left:12px">
-          <button class="btn small" onclick="editTask('${t.id}')">${t.status==='done'?'View':'Edit'}</button>
-          <button class="btn ghost small" onclick="toggleDone('${t.id}')">${t.status==='done'?'Mark open':'Mark done'}</button>
-        </div>
-      </div>
-    `);
-  });
-
-  // announcements
-  const annList = el('annList'); annList.innerHTML = '';
-  anns.sort((a,b)=> b.created - a.created).forEach(a=>{
-    annList.insertAdjacentHTML('beforeend', `
-      <div class="list-item">
-        <div style="flex:1">
-          <div style="font-weight:600">${a.title}</div>
-          <div class="meta">${a.body}</div>
-          <div class="small-muted">${new Date(a.created).toLocaleString()}</div>
-        </div>
-        <div style="display:flex;flex-direction:column;gap:6px">
-          <button class="btn small" onclick="deleteAnn('${a.id}')">Delete</button>
-        </div>
-      </div>
-    `);
-  });
-
-  // staff
-  const staffList = el('staffList'); staffList.innerHTML = '';
-  staff.forEach(s=>{
-    staffList.insertAdjacentHTML('beforeend', `
-      <div class="list-item">
-        <div>
-          <div style="font-weight:600">${s.name}</div>
-          <div class="meta">${s.role || ''} • ${s.contact || ''}</div>
-        </div>
-        <div style="display:flex;flex-direction:column;gap:6px">
-          <button class="btn small" onclick="editStaff('${s.id}')">Edit</button>
-          <button class="btn ghost small" onclick="removeStaff('${s.id}')">Remove</button>
-        </div>
-      </div>
-    `);
-  });
-
-  // docs
-  const docList = el('docList'); docList.innerHTML = '';
-  docs.sort((a,b)=> b.created - a.created).forEach(d=>{
-    docList.insertAdjacentHTML('beforeend', `
-      <div class="list-item">
-        <div>
-          <div style="font-weight:600">${d.name}</div>
-          <div class="meta">Size: ${Math.round((d.size||0)/1024)} KB • ${new Date(d.created).toLocaleString()}</div>
-        </div>
-        <div style="display:flex;flex-direction:column;gap:6px">
-          <button class="btn small" onclick="downloadDoc('${d.id}')">Download</button>
-          <button class="btn ghost small" onclick="removeDoc('${d.id}')">Remove</button>
-        </div>
-      </div>
-    `);
-  });
-}
-
-/* ===========================
-   Task operations
-   =========================== */
-async function addOrUpdateTask(ev){
-  ev?.preventDefault();
-  const id = el('taskForm').dataset.editId;
-  const title = el('taskTitle').value.trim();
-  if(!title) return alert('Title required');
-  const desc = el('taskDesc').value.trim();
-  const assignee = el('taskAssignee').value || null;
-  const due = el('taskDue').value ? new Date(el('taskDue').value).getTime() : null;
-  const status = el('taskStatus').value;
-
-  const obj = { id: id || uid(), title, desc, assignee, due, status, updated: Date.now() };
-  await put('tasks', obj);
-  el('taskForm').reset();
-  delete el('taskForm').dataset.editId;
-  renderAll();
-}
-
-async function editTask(id){
-  const t = await getOne('tasks',id);
-  if(!t) return;
-  el('taskTitle').value = t.title; el('taskDesc').value = t.desc || '';
-  if(t.assignee) el('taskAssignee').value = t.assignee; else el('taskAssignee').value = '';
-  if(t.due) { const dt = new Date(t.due); el('taskDue').value = dt.toISOString().slice(0,10); } else el('taskDue').value = '';
-  el('taskStatus').value = t.status || 'todo';
-  el('taskForm').dataset.editId = id;
-  window.scrollTo({top:0,behavior:'smooth'});
-}
-
-async function toggleDone(id){
-  const t = await getOne('tasks',id);
-  if(!t) return;
-  t.status = t.status === 'done' ? 'todo' : 'done';
-  t.updated = Date.now();
-  await put('tasks', t);
-  renderAll();
-}
-
-/* ===========================
-   Announcements
-   =========================== */
-async function newAnnouncement(){
-  const title = prompt('Title for announcement:');
-  if(!title) return;
-  const body = prompt('Message:') || '';
-  const a = { id: uid(), title, body, created: Date.now() };
-  await put('ann', a);
-  renderAll();
-}
-async function deleteAnn(id){
-  if(!confirm('Delete announcement?')) return;
-  await del('ann', id);
-  renderAll();
-}
-
-/* ===========================
-   Staff
-   =========================== */
-async function addStaff(){
-  const name = prompt('Staff name:');
-  if(!name) return;
-  const role = prompt('Role (optional):') || '';
-  const contact = prompt('Contact (optional):') || '';
-  const s = { id: uid(), name, role, contact, created: Date.now() };
-  await put('staff', s);
-  renderAll();
-}
-async function editStaff(id){
-  const s = await getOne('staff', id);
-  if(!s) return;
-  const name = prompt('Name:', s.name) || s.name;
-  const role = prompt('Role:', s.role) || s.role;
-  const contact = prompt('Contact:', s.contact) || s.contact;
-  s.name = name; s.role = role; s.contact = contact; s.updated = Date.now();
-  await put('staff', s); renderAll();
-}
-async function removeStaff(id){
-  if(!confirm('Remove staff?')) return;
-  await del('staff', id); renderAll();
-}
-
-/* ===========================
-   Documents (store as blobs in IndexedDB)
-   =========================== */
-async function uploadDocFile(file){
-  const arrBuff = await file.arrayBuffer();
-  const obj = { id: uid(), name: file.name, type: file.type, size: file.size, blob: arrBuff, created: Date.now() };
-  await put('docs', obj);
-  renderAll();
-}
-async function downloadDoc(id){
-  const d = await getOne('docs', id);
-  if(!d) return alert('File not found');
-  const blob = new Blob([d.blob], { type: d.type || 'application/octet-stream' });
-  const url = URL.createObjectURL(blob);
-  const a = document.createElement('a');
-  a.href = url; a.download = d.name;
-  document.body.appendChild(a); a.click(); a.remove();
-  setTimeout(()=>URL.revokeObjectURL(url), 3000);
-}
-async function removeDoc(id){
-  if(!confirm('Remove document?')) return;
-  await del('docs', id); renderAll();
-}
-
-/* ===========================
-   Export / Import / Clear
-   =========================== */
-async function exportJson(){
-  const tasks = await getAll('tasks');
-  const staff = await getAll('staff');
-  const ann = await getAll('ann');
-  const docsRaw = await getAll('docs');
-  // For export, convert blobs to base64 to make JSON portable (may be large)
-  const docs = await Promise.all(docsRaw.map(async d=>{
-    const b = d.blob;
-    // convert ArrayBuffer to base64
-    const base64 = await arrayBufferToBase64(b);
-    return { id:d.id, name:d.name,type:d.type,size:d.size,created:d.created, data:base64 };
-  }));
-  const payload = { exportedAt:Date.now(), tasks, staff, ann, docs };
-  const blob = new Blob([JSON.stringify(payload, null, 2)], { type:'application/json' });
-  const url = URL.createObjectURL(blob);
-  const a = document.createElement('a'); a.href = url; a.download = 'unit-admin-backup.json'; document.body.appendChild(a); a.click(); a.remove();
-  URL.revokeObjectURL(url);
-}
-async function importJson(file){
-  try{
-    const text = await file.text();
-    const obj = JSON.parse(text);
-    // write stores
-    for(const t of obj.tasks||[]) await put('tasks', t);
-    for(const s of obj.staff||[]) await put('staff', s);
-    for(const a of obj.ann||[]) await put('ann', a);
-    for(const d of (obj.docs||[])){
-      // base64 -> ArrayBuffer
-      const arr = base64ToArrayBuffer(d.data);
-      await put('docs', { id:d.id, name:d.name, type:d.type, size:d.size, blob:arr, created:d.created });
+    function addTask() {
+      const title = document.getElementById('taskTitle').value;
+      const details = document.getElementById('taskDetails').value;
+      if (title) {
+        const li = document.createElement('li');
+        li.textContent = `${title}: ${details}`;
+        document.getElementById('taskList').appendChild(li);
+        document.getElementById('taskTitle').value = '';
+        document.getElementById('taskDetails').value = '';
+        saveData();
+      }
     }
-    alert('Imported data');
-    renderAll();
-  }catch(err){
-    console.error(err); alert('Import failed: '+err.message);
-  }
-}
-function arrayBufferToBase64(buf){
-  return new Promise((res,rej)=>{
-    const blob = new Blob([buf]);
-    const fr = new FileReader();
-    fr.onload = ()=>res(fr.result.split(',')[1]);
-    fr.onerror = rej;
-    fr.readAsDataURL(blob);
-  });
-}
-function base64ToArrayBuffer(base64){
-  const binary = atob(base64);
-  const len = binary.length;
-  const bytes = new Uint8Array(len);
-  for(let i=0;i<len;i++) bytes[i]=binary.charCodeAt(i);
-  return bytes.buffer;
-}
 
-/* ===========================
-   Sync placeholder (online)
-   =========================== */
-async function syncNow(){
-  if(!navigator.onLine) return alert('Offline — cannot sync now.');
-  // Placeholder: you can set an endpoint in meta store or edit here to push local changes
-  const endpoint = await getOne('meta', 'syncEndpoint');
-  if(!endpoint || !endpoint.value) return alert('No sync endpoint configured. Use export/import or configure a sync endpoint in code.');
-  // Example: push all data
-  const payload = {
-    tasks: await getAll('tasks'),
-    staff: await getAll('staff'),
-    ann: await getAll('ann'),
-    docs: await getAll('docs'),
-    device: navigator.userAgent
-  };
-  try{
-    const r = await fetch(endpoint.value, {method:'POST', headers:{'Content-Type':'application/json'}, body:JSON.stringify(payload)});
-    if(r.ok) alert('Sync success');
-    else alert('Sync failed: '+r.status);
-  }catch(err){ alert('Sync error: '+err.message) }
-}
+    function saveNote() {
+      const text = document.getElementById('noteText').value;
+      if (text) {
+        const p = document.createElement('p');
+        p.textContent = text;
+        document.getElementById('savedNotes').appendChild(p);
+        document.getElementById('noteText').value = '';
+        saveData();
+      }
+    }
 
-/* ===========================
-   Utilities & events
-   =========================== */
-document.addEventListener('DOMContentLoaded', async ()=>{
-  await openDb();
-  // create sample staff if empty
-  const s = await getAll('staff');
-  if(s.length===0){
-    await put('staff', { id: uid(), name: 'Admin (You)', role:'Unit Admin', contact:'' });
-  }
-  renderAll();
+    function saveData() {
+      const data = {
+        staff: document.getElementById('staffList').innerHTML,
+        tasks: document.getElementById('taskList').innerHTML,
+        notes: document.getElementById('savedNotes').innerHTML
+      };
+      localStorage.setItem('unitAdminData', JSON.stringify(data));
+    }
 
-  // bind
-  el('taskForm').addEventListener('submit', addOrUpdateTask);
-  el('clearTask').addEventListener('click', ()=>{ el('taskForm').reset(); delete el('taskForm').dataset.editId; });
-  el('addStaffBtn').addEventListener('click', addStaff);
-  el('newAnnBtn').addEventListener('click', newAnnouncement);
-  el('uploadDoc').addEventListener('click', ()=>el('docFile').click());
-  el('docFile').addEventListener('change', async (e)=>{ const f = e.target.files[0]; if(f) await uploadDocFile(f); e.target.value=''; renderAll(); });
-  el('btnExport').addEventListener('click', exportJson);
-  el('btnImport').addEventListener('click', ()=>{ const input = document.createElement('input'); input.type='file'; input.accept='application/json'; input.onchange = e => { const f = e.target.files[0]; if(f) importJson(f) }; input.click(); });
-  el('btnSync').addEventListener('click', syncNow);
-  el('btnClearAll').addEventListener('click', async ()=>{ if(confirm('Clear ALL local data? This cannot be undone.')){ await clearStore('tasks'); await clearStore('staff'); await clearStore('ann'); await clearStore('docs'); renderAll(); } });
+    function loadData() {
+      const saved = localStorage.getItem('unitAdminData');
+      if (saved) {
+        const data = JSON.parse(saved);
+        document.getElementById('staffList').innerHTML = data.staff;
+        document.getElementById('taskList').innerHTML = data.tasks;
+        document.getElementById('savedNotes').innerHTML = data.notes;
+      }
+    }
 
-  // search
-  el('globalSearch').addEventListener('input', async (e)=>{
-    const q = e.target.value.trim().toLowerCase();
-    if(!q) return renderAll();
-    const tasks = (await getAll('tasks')).filter(t=> (t.title||'').toLowerCase().includes(q) || (t.desc||'').toLowerCase().includes(q));
-    const staff = (await getAll('staff')).filter(s=> (s.name||'').toLowerCase().includes(q) || (s.role||'').toLowerCase().includes(q));
-    const anns = (await getAll('ann')).filter(a=> (a.title||'').toLowerCase().includes(q) || (a.body||'').toLowerCase().includes(q));
-    // render simple combined results
-    el('tasksList').innerHTML = tasks.map(t=>`<div class="list-item"><div><div style="font-weight:600">${t.title}</div><div class="meta">${t.desc||''}</div></div></div>`).join('');
-    el('staffList').innerHTML = staff.map(s=>`<div class="list-item"><div><div style="font-weight:600">${s.name}</div><div class="meta">${s.role||''}</div></div></div>`).join('');
-    el('annList').innerHTML = anns.map(a=>`<div class="list-item"><div><div style="font-weight:600">${a.title}</div><div class="meta">${a.body}</div></div></div>`).join('');
-  });
-
-  // install prompt
-  let deferredPrompt;
-  window.addEventListener('beforeinstallprompt', (e)=>{ e.preventDefault(); deferredPrompt = e; el('installBtn').style.display='inline-block'; el('installBtn').onclick = async ()=>{ deferredPrompt.prompt(); const {outcome} = await deferredPrompt.userChoice; deferredPrompt = null; el('installBtn').style.display='none'; } });
-
-  // register SW
-  if('serviceWorker' in navigator){
-    try{ await navigator.serviceWorker.register('sw.js'); console.log('SW registered'); }catch(err){ console.warn('SW reg failed',err); }
-  }
-});
-
-/* ===========================
-   Misc UI actions called from markup (global)
-   =========================== */
-window.editTask = editTask;
-window.toggleDone = toggleDone;
-window.deleteAnn = deleteAnn;
-window.editStaff = editStaff;
-window.removeStaff = removeStaff;
-window.downloadDoc = downloadDoc;
-window.removeDoc = removeDoc;
-</script>
+    window.onload = loadData;
+  </script>
 </body>
 </html>
