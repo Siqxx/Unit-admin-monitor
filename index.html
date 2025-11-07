@@ -11,7 +11,7 @@
       background: #f4f7fa;
     }
     .container {
-      max-width: 900px;
+      max-width: 1000px;
       margin: auto;
       background: white;
       padding: 20px;
@@ -24,6 +24,12 @@
       color: white;
       padding: 10px;
       border-radius: 5px;
+    }
+    #reportDate {
+      text-align: right;
+      font-size: 14px;
+      color: #333;
+      margin-bottom: 10px;
     }
     #summary {
       margin: 15px 0;
@@ -58,6 +64,7 @@
     table {
       width: 100%;
       border-collapse: collapse;
+      margin-top: 10px;
     }
     th, td {
       border: 1px solid #ccc;
@@ -81,13 +88,19 @@
         border: none;
         background: none;
       }
+      #reportDate {
+        display: block;
+        text-align: left;
+        margin-top: 10px;
+        font-weight: bold;
+      }
     }
   </style>
 </head>
 <body>
   <div class="container">
     <h1>Unit Personnel Status Monitor</h1>
-
+    <div id="reportDate"></div>
     <div id="summary"><b>Personnel Summary:</b> No records yet.</div>
 
     <div class="controls">
@@ -100,9 +113,14 @@
         <option value="Sick Leave">Sick Leave</option>
         <option value="Official Business">Official Business</option>
         <option value="Under Instruction">Under Instruction</option>
-        <option value="Schooling">Schooling</option>
+        <option value="Schooling (Local)">Schooling (Local)</option>
+        <option value="Schooling (Foreign)">Schooling (Foreign)</option>
+        <option value="Training (Local)">Training (Local)</option>
+        <option value="Training (Foreign)">Training (Foreign)</option>
       </select>
-      <input type="date" id="dateReported">
+      <input type="date" id="startDate" title="Start of duration">
+      <input type="date" id="endDate" title="End of duration">
+      <input type="file" id="soiFile" accept=".pdf,.jpg,.png,.doc,.docx">
       <button id="addBtn">Add Personnel</button>
       <button id="printBtn">🖨️ Print</button>
     </div>
@@ -113,7 +131,8 @@
           <th>Name</th>
           <th>Designation</th>
           <th>Status</th>
-          <th>Date Reported</th>
+          <th>Duration</th>
+          <th>SOI File</th>
           <th>Actions</th>
         </tr>
       </thead>
@@ -125,35 +144,67 @@
     const nameInput = document.getElementById('name');
     const designationInput = document.getElementById('designation');
     const statusInput = document.getElementById('status');
-    const dateInput = document.getElementById('dateReported');
+    const startInput = document.getElementById('startDate');
+    const endInput = document.getElementById('endDate');
+    const soiFileInput = document.getElementById('soiFile');
     const tableBody = document.querySelector('#personnelTable tbody');
     const addBtn = document.getElementById('addBtn');
     const printBtn = document.getElementById('printBtn');
     const summaryDiv = document.getElementById('summary');
+    const reportDate = document.getElementById('reportDate');
 
+    // Display today's date
+    const today = new Date().toLocaleDateString('en-US', {
+      year: 'numeric', month: 'long', day: 'numeric'
+    });
+    reportDate.textContent = `Personnel Status Report as of ${today}`;
+
+    // Load saved data
     let records = JSON.parse(localStorage.getItem('personnelRecords')) || [];
     displayRecords();
 
     addBtn.addEventListener('click', () => {
-      if (!nameInput.value || !designationInput.value || !dateInput.value) {
-        alert('Please fill out all fields.');
+      if (!nameInput.value || !designationInput.value || !startInput.value) {
+        alert('Please fill out required fields.');
         return;
       }
 
-      const record = {
-        name: nameInput.value,
-        designation: designationInput.value,
-        status: statusInput.value,
-        date: dateInput.value
-      };
-
-      records.push(record);
-      localStorage.setItem('personnelRecords', JSON.stringify(records));
-      displayRecords();
-
-      nameInput.value = '';
-      designationInput.value = '';
-      dateInput.value = '';
+      let soiFileName = '';
+      if (soiFileInput.files.length > 0) {
+        const file = soiFileInput.files[0];
+        const reader = new FileReader();
+        reader.onload = function(e) {
+          const fileData = e.target.result;
+          const record = {
+            name: nameInput.value,
+            designation: designationInput.value,
+            status: statusInput.value,
+            start: startInput.value,
+            end: endInput.value || '—',
+            soiFile: fileData,
+            soiName: file.name
+          };
+          records.push(record);
+          localStorage.setItem('personnelRecords', JSON.stringify(records));
+          displayRecords();
+          clearInputs();
+        };
+        reader.readAsDataURL(file);
+      } else {
+        const record = {
+          name: nameInput.value,
+          designation: designationInput.value,
+          status: statusInput.value,
+          start: startInput.value,
+          end: endInput.value || '—',
+          soiFile: '',
+          soiName: ''
+        };
+        records.push(record);
+        localStorage.setItem('personnelRecords', JSON.stringify(records));
+        displayRecords();
+        clearInputs();
+      }
     });
 
     function displayRecords() {
@@ -164,7 +215,8 @@
           <td>${rec.name}</td>
           <td>${rec.designation}</td>
           <td>${rec.status}</td>
-          <td>${rec.date}</td>
+          <td>${rec.start} to ${rec.end}</td>
+          <td>${rec.soiFile ? `<a href="${rec.soiFile}" download="${rec.soiName}">Download</a>` : '—'}</td>
           <td><button onclick="deleteRecord(${index})">❌</button></td>
         `;
         tableBody.appendChild(row);
@@ -191,6 +243,14 @@
         .join(' &nbsp; | &nbsp; ');
 
       summaryDiv.innerHTML = `<b>Personnel Summary:</b> ${summaryText || 'No records yet.'}`;
+    }
+
+    function clearInputs() {
+      nameInput.value = '';
+      designationInput.value = '';
+      startInput.value = '';
+      endInput.value = '';
+      soiFileInput.value = '';
     }
 
     printBtn.addEventListener('click', () => {
