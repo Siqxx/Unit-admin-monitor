@@ -7,104 +7,96 @@
   <style>
     body {
       font-family: Arial, sans-serif;
-      margin: 20px;
       background: #f4f7fa;
+      margin: 0;
+      padding: 20px;
     }
     .container {
-      max-width: 1000px;
+      max-width: 1200px;
       margin: auto;
-      background: white;
+      background: #fff;
       padding: 20px;
       border-radius: 10px;
       box-shadow: 0 0 10px rgba(0,0,0,0.1);
     }
     h1 {
-      text-align: center;
       background: #004aad;
-      color: white;
-      padding: 10px;
+      color: #fff;
+      text-align: center;
+      padding: 15px;
       border-radius: 5px;
     }
     #reportDate {
       text-align: right;
-      font-size: 14px;
       color: #333;
-      margin-bottom: 10px;
-    }
-    #summary {
-      margin: 15px 0;
-      background: #e9f1ff;
-      padding: 10px;
-      border-left: 5px solid #004aad;
+      font-size: 14px;
+      margin-top: 5px;
     }
     .controls {
       display: flex;
       flex-wrap: wrap;
       gap: 10px;
-      margin-bottom: 15px;
+      margin-top: 20px;
     }
-    input, select, button {
+    input, select, button, textarea {
       padding: 10px;
       font-size: 14px;
     }
-    input, select {
+    input, select, textarea {
       flex: 1;
-      min-width: 130px;
+      min-width: 120px;
+    }
+    textarea {
+      min-height: 35px;
     }
     button {
       background: #004aad;
-      color: white;
+      color: #fff;
       border: none;
       border-radius: 5px;
       cursor: pointer;
     }
-    button:hover {
-      background: #00337a;
-    }
+    button:hover { background: #00337a; }
     table {
       width: 100%;
       border-collapse: collapse;
-      margin-top: 10px;
+      margin-top: 20px;
     }
     th, td {
       border: 1px solid #ccc;
-      padding: 8px;
       text-align: center;
+      padding: 8px;
     }
     th {
       background: #004aad;
-      color: white;
+      color: #fff;
+    }
+    img {
+      width: 60px;
+      height: 60px;
+      object-fit: cover;
+      border-radius: 5px;
     }
     @media print {
-      button, .controls {
-        display: none;
-      }
+      button, .controls { display: none; }
+      body { background: #fff; }
       h1 {
         color: black;
         background: none;
         border-bottom: 2px solid #004aad;
-      }
-      #summary {
-        border: none;
-        background: none;
-      }
-      #reportDate {
-        display: block;
-        text-align: left;
-        margin-top: 10px;
-        font-weight: bold;
       }
     }
   </style>
 </head>
 <body>
   <div class="container">
-    <h1>MSSU NCR-CL Personnel Status Monitoring</h1>
+    <h1>Unit Personnel Status Monitor</h1>
     <div id="reportDate"></div>
-    <div id="summary"><b>Personnel Summary:</b> No records yet.</div>
 
     <div class="controls">
-      <input type="text" id="name" placeholder="Personnel Name">
+      <input type="text" id="itemNo" placeholder="Item #">
+      <input type="file" id="photoInput" accept="image/*">
+      <input type="text" id="name" placeholder="Name">
       <input type="text" id="designation" placeholder="Designation">
       <select id="status">
         <option value="On Duty">On Duty</option>
@@ -118,9 +110,16 @@
         <option value="Training (Local)">Training (Local)</option>
         <option value="Training (Foreign)">Training (Foreign)</option>
       </select>
-      <input type="date" id="startDate" title="Start of duration">
-      <input type="date" id="endDate" title="End of duration">
-      <input type="file" id="soiFile" accept=".pdf,.jpg,.png,.doc,.docx">
+      <input type="date" id="startDate">
+      <input type="date" id="endDate">
+      <textarea id="remarks" placeholder="Remarks / Authority"></textarea>
+      <select id="action">
+        <option value="Active DS">Active DS</option>
+        <option value="Organic">Organic</option>
+        <option value="Retired">Retired</option>
+        <option value="Transferred">Transferred to Other Unit</option>
+      </select>
+      <input type="file" id="soiFile" accept=".pdf,.doc,.docx">
       <button id="addBtn">Add Personnel</button>
       <button id="printBtn">🖨️ Print</button>
     </div>
@@ -128,12 +127,16 @@
     <table id="personnelTable">
       <thead>
         <tr>
+          <th>Item #</th>
+          <th>Photo</th>
           <th>Name</th>
           <th>Designation</th>
           <th>Status</th>
           <th>Duration</th>
-          <th>SOI File</th>
-          <th>Actions</th>
+          <th>Remarks</th>
+          <th>Action</th>
+          <th>SOI</th>
+          <th>Edit/Delete</th>
         </tr>
       </thead>
       <tbody></tbody>
@@ -141,70 +144,76 @@
   </div>
 
   <script>
-    const nameInput = document.getElementById('name');
-    const designationInput = document.getElementById('designation');
-    const statusInput = document.getElementById('status');
-    const startInput = document.getElementById('startDate');
-    const endInput = document.getElementById('endDate');
-    const soiFileInput = document.getElementById('soiFile');
-    const tableBody = document.querySelector('#personnelTable tbody');
-    const addBtn = document.getElementById('addBtn');
-    const printBtn = document.getElementById('printBtn');
-    const summaryDiv = document.getElementById('summary');
     const reportDate = document.getElementById('reportDate');
-
-    // Display today's date
-    const today = new Date().toLocaleDateString('en-US', {
-      year: 'numeric', month: 'long', day: 'numeric'
-    });
+    const today = new Date().toLocaleDateString('en-US', { year: 'numeric', month: 'long', day: 'numeric' });
     reportDate.textContent = `Personnel Status Report as of ${today}`;
 
-    // Load saved data
-    let records = JSON.parse(localStorage.getItem('personnelRecords')) || [];
+    const fields = {
+      itemNo: document.getElementById('itemNo'),
+      photoInput: document.getElementById('photoInput'),
+      name: document.getElementById('name'),
+      designation: document.getElementById('designation'),
+      status: document.getElementById('status'),
+      start: document.getElementById('startDate'),
+      end: document.getElementById('endDate'),
+      remarks: document.getElementById('remarks'),
+      action: document.getElementById('action'),
+      soiFile: document.getElementById('soiFile')
+    };
+
+    const tableBody = document.querySelector('#personnelTable tbody');
+    let records = JSON.parse(localStorage.getItem('personnelRecordsV2')) || [];
     displayRecords();
 
-    addBtn.addEventListener('click', () => {
-      if (!nameInput.value || !designationInput.value || !startInput.value) {
-        alert('Please fill out required fields.');
+    document.getElementById('addBtn').addEventListener('click', () => {
+      if (!fields.name.value.trim() || !fields.designation.value.trim()) {
+        alert('Please complete the required fields.');
         return;
       }
 
-      let soiFileName = '';
-      if (soiFileInput.files.length > 0) {
-        const file = soiFileInput.files[0];
-        const reader = new FileReader();
-        reader.onload = function(e) {
-          const fileData = e.target.result;
-          const record = {
-            name: nameInput.value,
-            designation: designationInput.value,
-            status: statusInput.value,
-            start: startInput.value,
-            end: endInput.value || '—',
-            soiFile: fileData,
-            soiName: file.name
-          };
-          records.push(record);
-          localStorage.setItem('personnelRecords', JSON.stringify(records));
-          displayRecords();
-          clearInputs();
+      const photoFile = fields.photoInput.files[0];
+      const soiFile = fields.soiFile.files[0];
+
+      const handleFiles = (photoData, soiData, soiName) => {
+        const newRecord = {
+          id: Date.now(),
+          itemNo: fields.itemNo.value,
+          photo: photoData,
+          name: fields.name.value,
+          designation: fields.designation.value,
+          status: fields.status.value,
+          start: fields.start.value,
+          end: fields.end.value,
+          remarks: fields.remarks.value,
+          action: fields.action.value,
+          soiFile: soiData,
+          soiName: soiName
         };
-        reader.readAsDataURL(file);
-      } else {
-        const record = {
-          name: nameInput.value,
-          designation: designationInput.value,
-          status: statusInput.value,
-          start: startInput.value,
-          end: endInput.value || '—',
-          soiFile: '',
-          soiName: ''
-        };
-        records.push(record);
-        localStorage.setItem('personnelRecords', JSON.stringify(records));
-        displayRecords();
+        records.push(newRecord);
+        saveAndDisplay();
         clearInputs();
-      }
+      };
+
+      const readerTasks = [];
+      let photoData = '', soiData = '', soiName = '';
+
+      if (photoFile) {
+        readerTasks.push(new Promise(resolve => {
+          const r = new FileReader();
+          r.onload = e => { photoData = e.target.result; resolve(); };
+          r.readAsDataURL(photoFile);
+        }));
+      } else readerTasks.push(Promise.resolve());
+
+      if (soiFile) {
+        readerTasks.push(new Promise(resolve => {
+          const r = new FileReader();
+          r.onload = e => { soiData = e.target.result; soiName = soiFile.name; resolve(); };
+          r.readAsDataURL(soiFile);
+        }));
+      } else readerTasks.push(Promise.resolve());
+
+      Promise.all(readerTasks).then(() => handleFiles(photoData, soiData, soiName));
     });
 
     function displayRecords() {
@@ -212,50 +221,55 @@
       records.forEach((rec, index) => {
         const row = document.createElement('tr');
         row.innerHTML = `
-          <td>${rec.name}</td>
-          <td>${rec.designation}</td>
-          <td>${rec.status}</td>
-          <td>${rec.start} to ${rec.end}</td>
-          <td>${rec.soiFile ? `<a href="${rec.soiFile}" download="${rec.soiName}">Download</a>` : '—'}</td>
-          <td><button onclick="deleteRecord(${index})">❌</button></td>
+          <td>${rec.itemNo || ''}</td>
+          <td>${rec.photo ? `<img src="${rec.photo}" alt="Photo">` : '—'}</td>
+          <td contenteditable="true" onblur="editField(${index}, 'name', this.textContent)">${rec.name}</td>
+          <td contenteditable="true" onblur="editField(${index}, 'designation', this.textContent)">${rec.designation}</td>
+          <td>
+            <select onchange="editField(${index}, 'status', this.value)">
+              ${["On Duty","Rest & Recreation Leave","Mandatory Leave","Sick Leave","Official Business","Under Instruction","Schooling (Local)","Schooling (Foreign)","Training (Local)","Training (Foreign)"]
+                .map(st => `<option ${rec.status === st ? 'selected':''}>${st}</option>`).join('')}
+            </select>
+          </td>
+          <td><input type="date" value="${rec.start}" onchange="editField(${index}, 'start', this.value)"> to 
+              <input type="date" value="${rec.end}" onchange="editField(${index}, 'end', this.value)"></td>
+          <td contenteditable="true" onblur="editField(${index}, 'remarks', this.textContent)">${rec.remarks || ''}</td>
+          <td>
+            <select onchange="editField(${index}, 'action', this.value)">
+              ${["Active DS","Organic","Retired","Transferred"].map(a => `<option ${rec.action===a?'selected':''}>${a}</option>`).join('')}
+            </select>
+          </td>
+          <td>${rec.soiFile ? `<a href="${rec.soiFile}" download="${rec.soiName}">📄 ${rec.soiName}</a>` : '—'}</td>
+          <td>
+            <button onclick="deleteRecord(${index})">❌</button>
+          </td>
         `;
         tableBody.appendChild(row);
       });
-      updateSummary();
+    }
+
+    function editField(index, key, value) {
+      records[index][key] = value;
+      saveAndDisplay();
     }
 
     function deleteRecord(index) {
       if (confirm('Delete this record?')) {
         records.splice(index, 1);
-        localStorage.setItem('personnelRecords', JSON.stringify(records));
-        displayRecords();
+        saveAndDisplay();
       }
     }
 
-    function updateSummary() {
-      const counts = {};
-      records.forEach(rec => {
-        counts[rec.status] = (counts[rec.status] || 0) + 1;
-      });
-
-      const summaryText = Object.entries(counts)
-        .map(([status, count]) => `<strong>${status}</strong>: ${count}`)
-        .join(' &nbsp; | &nbsp; ');
-
-      summaryDiv.innerHTML = `<b>Personnel Summary:</b> ${summaryText || 'No records yet.'}`;
-    }
-
     function clearInputs() {
-      nameInput.value = '';
-      designationInput.value = '';
-      startInput.value = '';
-      endInput.value = '';
-      soiFileInput.value = '';
+      Object.values(fields).forEach(f => f.value = '');
     }
 
-    printBtn.addEventListener('click', () => {
-      window.print();
-    });
+    function saveAndDisplay() {
+      localStorage.setItem('personnelRecordsV2', JSON.stringify(records));
+      displayRecords();
+    }
+
+    document.getElementById('printBtn').addEventListener('click', () => window.print());
   </script>
 </body>
 </html>
