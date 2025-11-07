@@ -1,346 +1,335 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>MSSU NCR-CL PERSONNEL STATUS</title>
-  <style>
-    body {
-      font-family: Arial, sans-serif;
-      background: #f4f7fa;
-      margin: 0;
-      padding: 20px;
-    }
-    .container {
-      max-width: 1200px;
-      margin: auto;
-      background: #fff;
-      padding: 20px;
-      border-radius: 10px;
-      box-shadow: 0 0 10px rgba(0,0,0,0.1);
-    }
-    h1 {
-      background: #004aad;
-      color: #fff;
-      text-align: center;
-      padding: 15px;
-      border-radius: 5px;
-    }
-    #reportDate {
-      text-align: right;
-      color: #333;
-      font-size: 14px;
-      margin-top: 5px;
-    }
-    .controls {
-      display: flex;
-      flex-wrap: wrap;
-      gap: 10px;
-      margin-top: 20px;
-    }
-    input, select, button, textarea {
-  padding: 6px;
-  font-size: 13px;
-}
-input, select, textarea {
-  flex: 1;
-  min-width: 100px;
-  max-width: 140px;
-}
-textarea {
-  min-height: 30px;
-    }
-    textarea {
-      min-height: 35px;
-    }
-    button {
-      background: #004aad;
-      color: #fff;
-      border: none;
-      border-radius: 5px;
-      cursor: pointer;
-    }
-    button:hover { background: #00337a; }
-    table {
-      width: 100%;
-      border-collapse: collapse;
-      margin-top: 20px;
-    }
-    th, td {
-      border: 1px solid #ccc;
-      text-align: center;
-      padding: 8px;
-    }
-    th {
-      background: #004aad;
-      color: #fff;
-    }
-    img {
-      width: 60px;
-      height: 60px;
-      object-fit: cover;
-      border-radius: 5px;
-    }
-    .tab-buttons {
-  display: flex;
-  justify-content: center;
-  gap: 5px;
-  margin-top: 10px;
-}
-.tab-btn {
-  background: #004aad;
-  color: white;
-  border: none;
-  padding: 6px 10px;
-  border-radius: 5px;
-  cursor: pointer;
-}
-.tab-btn.active {
-  background: #00337a;
-}
-.tab-content {
-  display: none;
-}
-.tab-content.active {
-  display: block;
-}
-#printFooter {
-  display: none;
-  margin-top: 40px;
-  font-size: 14px;
-}
-@media print {
-  .controls, .tab-buttons, button, input, select, textarea { display: none !important; }
-  #printFooter {
-    display: block;
-    text-align: left;
-    margin-top: 50px;
-    @media print {
-  .controls, button, input, select, textarea { display: none !important; }
-  body { background: #fff; margin: 20px; }
-  h1 {
-    color: black;
-    background: none;
-    border-bottom: 2px solid #004aad;
-    padding-bottom: 5px;
-    margin-bottom: 10px;
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>MSSU NCR-CL PERSONNEL STATUS</title>
+<style>
+  body {
+    font-family: Arial, sans-serif;
+    background: #f5f7fa;
+    margin: 0;
+    padding: 0;
   }
-  #reportDate {
-    display: block;
-    text-align: right;
-    font-weight: bold;
-    margin-bottom: 10px;
+  header {
+    background: #004aad;
+    color: white;
+    text-align: center;
+    padding: 1em;
+    font-size: 1.2em;
+  }
+  main {
+    padding: 1em;
+  }
+  h1 {
+    text-align: center;
+    color: #004aad;
+  }
+  h3 {
+    color: #004aad;
+  }
+  .controls {
+    background: white;
+    padding: 10px;
+    border-radius: 8px;
+    box-shadow: 0 0 5px rgba(0,0,0,0.1);
+    margin-bottom: 15px;
+  }
+  input, select, textarea, button {
+    padding: 5px;
+    margin: 4px;
+    font-size: 0.9em;
+  }
+  input, select, textarea {
+    width: auto;
+  }
+  button {
+    background: #004aad;
+    color: white;
+    border: none;
+    border-radius: 5px;
+  }
+  button:hover {
+    background: #00337a;
   }
   table {
-    font-size: 13px;
-      }
-    }
-  </style>
+    width: 100%;
+    border-collapse: collapse;
+    background: white;
+  }
+  th, td {
+    border: 1px solid #ccc;
+    padding: 6px;
+    text-align: center;
+    font-size: 0.9em;
+  }
+  th {
+    background: #004aad;
+    color: white;
+  }
+  img {
+    width: 40px;
+    height: 40px;
+    border-radius: 5px;
+  }
+  .tab-buttons {
+    display: flex;
+    justify-content: center;
+    gap: 5px;
+    margin: 10px 0;
+  }
+  .tab-btn {
+    background: #004aad;
+    color: white;
+    border: none;
+    padding: 6px 10px;
+    border-radius: 5px;
+    cursor: pointer;
+  }
+  .tab-btn.active {
+    background: #00337a;
+  }
+  .tab-content {
+    display: none;
+  }
+  .tab-content.active {
+    display: block;
+  }
+  .tallyBox, #summaryBox {
+    margin-top: 10px;
+    background: #e9f0ff;
+    padding: 8px;
+    border-radius: 6px;
+    font-size: 0.9em;
+  }
+  #printFooter {
+    display: none;
+    margin-top: 50px;
+    font-size: 14px;
+  }
+  @media print {
+    .controls, .tab-buttons, button, input, select, textarea { display: none !important; }
+    #printFooter { display: block; text-align: left; page-break-before: always; }
+    .tallyBox, #summaryBox { page-break-inside: avoid; }
+  }
+</style>
 </head>
 <body>
-  <div class="container">
-   <h1>MSSU NCR-CL PERSONNEL STATUS</h1>
-<div id="reportDate"></div>
+<header><strong>MSSU NCR-CL PERSONNEL STATUS</strong></header>
+<main>
+  <div id="reportDate"></div>
 
-<!-- Tabs for 3 sections -->
-<div class="tab-buttons">
-  <button class="tab-btn active" data-tab="mssu">MSSU</button>
-  <button class="tab-btn" data-tab="ds">Detached Status (DS)</button>
-  <button class="tab-btn" data-tab="psc">PSC Division</button>
-</div>
-
-<!-- Control input area -->
-<div class="controls">
-  <input type="text" id="itemNo" placeholder="Item #">
-  <input type="file" id="photoInput" accept="image/*">
-  <input type="text" id="name" placeholder="Name">
-  <input type="text" id="designation" placeholder="Designation">
-  <select id="status">
-    <option value="On Duty">On Duty</option>
-    <option value="Rest & Recreation Leave">Rest & Recreation Leave</option>
-    <option value="Mandatory Leave">Mandatory Leave</option>
-    <option value="Sick Leave">Sick Leave</option>
-    <option value="Official Business">Official Business</option>
-    <option value="Under Instruction">Under Instruction</option>
-    <option value="Schooling (Local)">Schooling (Local)</option>
-    <option value="Schooling (Foreign)">Schooling (Foreign)</option>
-    <option value="Training (Local)">Training (Local)</option>
-    <option value="Training (Foreign)">Training (Foreign)</option>
-  </select>
-  <input type="date" id="startDate">
-  <input type="date" id="endDate">
-  <textarea id="remarks" placeholder="Remarks / Authority"></textarea>
-  <select id="action">
-    <option value="Active DS">Active DS</option>
-    <option value="Organic">Organic</option>
-    <option value="Retired">Retired</option>
-    <option value="Transferred">Transferred</option>
-    <option value="AWOL">AWOL</option>
-  </select>
-  <input type="file" id="soiFile" accept=".pdf,.doc,.docx">
-  <button id="addBtn">Add Personnel</button>
-  <button id="printBtn">🖨️ Print</button>
-</div>
-
-<!-- Tables per section -->
-<div id="mssu" class="tab-content active">
-  <h3>MSSU Personnel</h3>
-  <table id="mssuTable" class="personnelTable">
-    <thead>
-      <tr>
-        <th>Item #</th><th>Photo</th><th>Name</th><th>Designation</th>
-        <th>Status</th><th>Duration</th><th>Remarks</th><th>Action</th>
-        <th>SOI</th><th>Edit/Delete</th>
-      </tr>
-    </thead>
-    <tbody></tbody>
-  </table>
-</div>
-
-<div id="ds" class="tab-content">
-  <h3>Detached Status (DS)</h3>
-  <table id="dsTable" class="personnelTable">
-    <thead>
-      <tr>
-        <th>Item #</th><th>Photo</th><th>Name</th><th>Designation</th>
-        <th>Status</th><th>Duration</th><th>Remarks</th><th>Action</th>
-        <th>SOI</th><th>Edit/Delete</th>
-      </tr>
-    </thead>
-    <tbody></tbody>
-  </table>
-</div>
-
-<div id="psc" class="tab-content">
-  <h3>PSC Division (South Harbor / North Harbor / Bataan / Subic)</h3>
-  <table id="pscTable" class="personnelTable">
-    <thead>
-      <tr>
-        <th>Item #</th><th>Photo</th><th>Name</th><th>Designation</th>
-        <th>Status</th><th>Duration</th><th>Remarks</th><th>Action</th>
-        <th>SOI</th><th>Edit/Delete</th>
-      </tr>
-    </thead>
-    <tbody></tbody>
-  </table>
-</div>
-
-<!-- Footer for print -->
-<div id="printFooter">
-  <p><strong>Prepared by:</strong> _________________________</p>
-  <p><strong>Verified by:</strong> _________________________</p>
-  <p><strong>Approved by:</strong> _________________________</p>
+  <div class="tab-buttons">
+    <button class="tab-btn active" data-tab="mssu">MSSU</button>
+    <button class="tab-btn" data-tab="ds">Detached Status (DS)</button>
+    <button class="tab-btn" data-tab="psc">PSC Division</button>
   </div>
 
-  <script>
-    const reportDate = document.getElementById('reportDate');
-    const today = new Date().toLocaleDateString('en-US', { year: 'numeric', month: 'long', day: 'numeric' });
-    reportDate.textContent = `Personnel Status Report as of ${today}`;
+  <div class="controls">
+    <input type="text" id="itemNo" placeholder="Item #">
+    <input type="file" id="photoInput" accept="image/*">
+    <input type="text" id="name" placeholder="Name">
+    <input type="text" id="designation" placeholder="Designation">
+    <select id="pscSubDivision" style="display:none;">
+      <option value="PSC Div Bataan">PSC Div Bataan</option>
+      <option value="PSC Div SH">PSC Div SH (South Harbor)</option>
+      <option value="PSC Div NH">PSC Div NH (North Harbor)</option>
+      <option value="PSC Div Subic">PSC Div Subic</option>
+    </select>
+    <select id="status">
+      <option value="On Duty">On Duty</option>
+      <option value="Rest & Recreation Leave">Rest & Recreation Leave</option>
+      <option value="Mandatory Leave">Mandatory Leave</option>
+      <option value="Sick Leave">Sick Leave</option>
+      <option value="Official Business">Official Business</option>
+      <option value="Under Instruction">Under Instruction</option>
+      <option value="Schooling (Local)">Schooling (Local)</option>
+      <option value="Schooling (Foreign)">Schooling (Foreign)</option>
+      <option value="Training (Local)">Training (Local)</option>
+      <option value="Training (Foreign)">Training (Foreign)</option>
+    </select>
+    <input type="date" id="startDate">
+    <input type="date" id="endDate">
+    <textarea id="remarks" placeholder="Remarks / Authority"></textarea>
+    <select id="action">
+      <option value="Active DS">Active DS</option>
+      <option value="Organic">Organic</option>
+      <option value="Retired">Retired</option>
+      <option value="Transferred">Transferred</option>
+    </select>
+    <input type="file" id="soiFile" accept=".pdf,.doc,.docx">
+    <button id="addBtn">Add Personnel</button>
+    <button id="printBtn">🖨️ Print</button>
+  </div>
 
-    const fields = {
-      itemNo: document.getElementById('itemNo'),
-      photoInput: document.getElementById('photoInput'),
-      name: document.getElementById('name'),
-      designation: document.getElementById('designation'),
-      status: document.getElementById('status'),
-      start: document.getElementById('startDate'),
-      end: document.getElementById('endDate'),
-      remarks: document.getElementById('remarks'),
-      action: document.getElementById('action'),
-      soiFile: document.getElementById('soiFile')
-    };
+  <!-- MSSU -->
+  <div id="mssu" class="tab-content active">
+    <h3>MSSU Personnel</h3>
+    <table id="mssuTable">
+      <thead>
+        <tr>
+          <th>Item #</th><th>Photo</th><th>Name</th><th>Designation</th>
+          <th>Status</th><th>Duration</th><th>Remarks</th>
+          <th>Action</th><th>SOI</th><th>Edit/Delete</th>
+        </tr>
+      </thead><tbody></tbody>
+    </table>
+    <div class="tallyBox" id="mssuTally"></div>
+  </div>
 
-    const tableBody = document.querySelector('#personnelTable tbody');
-    let records = {
+  <!-- DS -->
+  <div id="ds" class="tab-content">
+    <h3>Detached Status (DS)</h3>
+    <table id="dsTable">
+      <thead>
+        <tr>
+          <th>Item #</th><th>Photo</th><th>Name</th><th>Designation</th>
+          <th>Status</th><th>Duration</th><th>Remarks</th>
+          <th>Action</th><th>SOI</th><th>Edit/Delete</th>
+        </tr>
+      </thead><tbody></tbody>
+    </table>
+    <div class="tallyBox" id="dsTally"></div>
+  </div>
+
+  <!-- PSC -->
+  <div id="psc" class="tab-content">
+    <h3>PSC Division (Bataan / SH / NH / Subic)</h3>
+    <table id="pscTable">
+      <thead>
+        <tr>
+          <th>Item #</th><th>Photo</th><th>Name</th><th>Division</th>
+          <th>Status</th><th>Duration</th><th>Remarks</th>
+          <th>Action</th><th>SOI</th><th>Edit/Delete</th>
+        </tr>
+      </thead><tbody></tbody>
+    </table>
+    <div class="tallyBox" id="pscTally"></div>
+  </div>
+
+  <hr>
+  <h2>Summary of All Personnel</h2>
+  <div id="summaryBox"></div>
+
+  <div id="printFooter">
+    <p><strong>Prepared by:</strong> _________________________</p>
+    <p><strong>Verified by:</strong> _________________________</p>
+    <p><strong>Approved by:</strong> _________________________</p>
+  </div>
+</main>
+
+<script>
+document.getElementById('reportDate').innerHTML =
+  '<b>Date Generated:</b> ' + new Date().toLocaleDateString();
+
+let records = {
   mssu: JSON.parse(localStorage.getItem('mssuRecords')) || [],
   ds: JSON.parse(localStorage.getItem('dsRecords')) || [],
   psc: JSON.parse(localStorage.getItem('pscRecords')) || []
+};
+
+// Tab switching
+document.querySelectorAll('.tab-btn').forEach(btn => {
+  btn.addEventListener('click', () => {
+    document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
+    document.querySelectorAll('.tab-content').forEach(tab => tab.classList.remove('active'));
+    btn.classList.add('active');
+    document.getElementById(btn.dataset.tab).classList.add('active');
+    document.getElementById('pscSubDivision').style.display =
+      btn.dataset.tab === 'psc' ? 'inline-block' : 'none';
     displayRecords();
+  });
+});
 
-    document.getElementById('addBtn').addEventListener('click', () => {
-      if (!fields.name.value.trim() || !fields.designation.value.trim()) {
-        alert('Please complete the required fields.');
-        return;
-      }
+// Add Personnel
+document.getElementById('addBtn').addEventListener('click', () => {
+  const activeTab = document.querySelector('.tab-btn.active').dataset.tab;
+  const name = document.getElementById('name').value.trim();
+  if (!name) return alert("Please enter personnel name.");
 
-      const photoFile = fields.photoInput.files[0];
-      const soiFile = fields.soiFile.files[0];
+  const reader = new FileReader();
+  const photoFile = document.getElementById('photoInput').files[0];
+  const soiFile = document.getElementById('soiFile').files[0];
 
-      const handleFiles = (photoData, soiData, soiName) => {
-        const newRecord = {
-          id: Date.now(),
-          itemNo: fields.itemNo.value,
-          photo: photoData,
-          name: fields.name.value,
-          designation: fields.designation.value,
-          status: fields.status.value,
-          start: fields.start.value,
-          end: fields.end.value,
-          remarks: fields.remarks.value,
-          action: fields.action.value,
-          soiFile: soiData,
-          soiName: soiName
-        };
-        records.active(newRecord);
-        saveAndDisplay();
-        clearInputs();
-      };
+  reader.onload = function() {
+    const newRecord = {
+      itemNo: document.getElementById('itemNo').value,
+      photo: reader.result || '',
+      name: name,
+      designation: document.getElementById('designation').value,
+      pscSubDivision: document.getElementById('pscSubDivision').value,
+      status: document.getElementById('status').value,
+      start: document.getElementById('startDate').value,
+      end: document.getElementById('endDate').value,
+      remarks: document.getElementById('remarks').value,
+      action: document.getElementById('action').value,
+      soiFile: soiFile ? URL.createObjectURL(soiFile) : '',
+      soiName: soiFile ? soiFile.name : ''
+    };
+    records[activeTab].push(newRecord);
+    localStorage.setItem(activeTab + 'Records', JSON.stringify(records[activeTab]));
+    clearInputs();
+    displayRecords();
+  };
+  if (photoFile) reader.readAsDataURL(photoFile);
+  else reader.onload();
+});
 
-      const readerTasks = [];
-      let photoData = '', soiData = '', soiName = '';
+// Clear input boxes
+function clearInputs() {
+  document.querySelectorAll('input, textarea, select').forEach(el => {
+    if (el.type !== 'button' && el.id !== 'status' && el.id !== 'action')
+      el.value = '';
+  });
+}
 
-      if (photoFile) {
-        readerTasks.push(new Promise(resolve => {
-          const r = new FileReader();
-          r.onload = e => { photoData = e.target.result; resolve(); };
-          r.readAsDataURL(photoFile);
-        }));
-      } else readerTasks.push(Promise.resolve());
+// Display records
+function displayRecords() {
+  let grandTotal = 0;
 
-      if (soiFile) {
-        readerTasks.push(new Promise(resolve => {
-          const r = new FileReader();
-          r.onload = e => { soiData = e.target.result; soiName = soiFile.name; resolve(); };
-          r.readAsDataURL(soiFile);
-        }));
-      } else readerTasks.push(Promise.resolve());
-
-      Promise.all(readerTasks).then(() => handleFiles(photoData, soiData, soiName));
-    });
-
-    function displayRecords() {
   ['mssu','ds','psc'].forEach(type => {
     const tableBody = document.querySelector(`#${type}Table tbody`);
     tableBody.innerHTML = '';
+    let total = 0, onDuty = 0, leave = 0, training = 0, retired = 0;
+
     records[type].forEach((rec, index) => {
+      total++;
+      if (rec.status.includes('Duty')) onDuty++;
+      else if (rec.status.includes('Leave')) leave++;
+      else if (rec.status.includes('Schooling') || rec.status.includes('Training')) training++;
+      if (rec.action === 'Retired') retired++;
+
       const row = document.createElement('tr');
       row.innerHTML = `
         <td>${rec.itemNo || ''}</td>
-        <td>${rec.photo ? `<img src="${rec.photo}" alt="Photo">` : '—'}</td>
+        <td>${rec.photo ? `<img src="${rec.photo}">` : '—'}</td>
         <td contenteditable="true" onblur="editField('${type}',${index},'name',this.textContent)">${rec.name}</td>
-        <td contenteditable="true" onblur="editField('${type}',${index},'designation',this.textContent)">${rec.designation}</td>
-        <td><select onchange="editField('${type}',${index},'status',this.value)">
-          ${["On Duty","Rest & Recreation Leave","Mandatory Leave","Sick Leave","Official Business","Under Instruction","Schooling (Local)","Schooling (Foreign)","Training (Local)","Training (Foreign)"]
-          .map(st => `<option ${rec.status===st?'selected':''}>${st}</option>`).join('')}
-        </select></td>
-        <td><input type="date" value="${rec.start}" onchange="editField('${type}',${index},'start',this.value)"> to 
-        <input type="date" value="${rec.end}" onchange="editField('${type}',${index},'end',this.value)"></td>
-        <td contenteditable="true" onblur="editField('${type}',${index},'remarks',this.textContent)">${rec.remarks||''}</td>
-        <td><select onchange="editField('${type}',${index},'action',this.value)">
-          ${["Active DS","Organic","Retired","Transferred"].map(a=>`<option ${rec.action===a?'selected':''}>${a}</option>`).join('')}
-        </select></td>
+        <td>${type==='psc'?rec.pscSubDivision:rec.designation}</td>
+        <td>${rec.status}</td>
+        <td>${rec.start || ''} to ${rec.end || ''}</td>
+        <td>${rec.remarks || ''}</td>
+        <td>${rec.action}</td>
         <td>${rec.soiFile ? `<a href="${rec.soiFile}" download="${rec.soiName}">📄 ${rec.soiName}</a>` : '—'}</td>
         <td><button onclick="deleteRecord('${type}',${index})">❌</button></td>
       `;
       tableBody.appendChild(row);
     });
-  })
 
-    function editField(type, index, key, value) {
+    grandTotal += total;
+    document.getElementById(`${type}Tally`).innerHTML =
+      `<b>Total:</b> ${total} | On Duty: ${onDuty} | On Leave: ${leave} | Training/Schooling: ${training} | Retired: ${retired}`;
+  });
+
+  document.getElementById('summaryBox').innerHTML =
+    `<b>Overall Personnel:</b> ${grandTotal}<br>
+     MSSU: ${records.mssu.length}, DS: ${records.ds.length}, PSC: ${records.psc.length}`;
+}
+
+function editField(type, index, key, value) {
   records[type][index][key] = value;
   localStorage.setItem(type + 'Records', JSON.stringify(records[type]));
-  displayRecords();
 }
+
 function deleteRecord(type, index) {
   if (confirm('Delete this record?')) {
     records[type].splice(index, 1);
@@ -349,24 +338,9 @@ function deleteRecord(type, index) {
   }
 }
 
-    function clearInputs() {
-      Object.values(fields).forEach(f => f.value = '');
-    }
+document.getElementById('printBtn').addEventListener('click', () => window.print());
 
-    function saveAndDisplay() {
-      localStorage.setItem('personnelRecordsV2', JSON.stringify(records));
-      displayRecords();
-    }
-
-    document.getElementById('printBtn').addEventListener('click', () => window.print());
-    // Tab switching logic
-document.querySelectorAll('.tab-btn').forEach(btn => {
-  btn.addEventListener('click', () => {
-    document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
-    document.querySelectorAll('.tab-content').forEach(tab => tab.classList.remove('active'));
-    btn.classList.add('active');
-    document.getElementById(btn.dataset.tab).classList.add('active');
-  });
-  </script>
+displayRecords();
+</script>
 </body>
 </html>
