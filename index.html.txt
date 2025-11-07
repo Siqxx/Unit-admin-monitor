@@ -1,0 +1,151 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Unit Admin Monitor</title>
+  <link rel="manifest" href="manifest.json">
+  <script>
+    // Register service worker for offline use
+    if ('serviceWorker' in navigator) {
+      window.addEventListener('load', () => {
+        navigator.serviceWorker.register('sw.js')
+          .then(() => console.log('Service Worker Registered'));
+      });
+    }
+  </script>
+  <style>
+    body {
+      font-family: system-ui, sans-serif;
+      margin: 0;
+      padding: 0;
+      background: #f5f6fa;
+      color: #333;
+    }
+    header {
+      background: #004aad;
+      color: white;
+      text-align: center;
+      padding: 1em;
+      font-size: 1.2em;
+    }
+    main {
+      padding: 1em;
+    }
+    h2 {
+      border-bottom: 2px solid #004aad;
+      padding-bottom: 0.3em;
+    }
+    section {
+      background: white;
+      padding: 1em;
+      margin-bottom: 1em;
+      border-radius: 8px;
+      box-shadow: 0 0 5px rgba(0,0,0,0.1);
+    }
+    input, textarea, button {
+      width: 100%;
+      padding: 8px;
+      margin: 4px 0;
+      font-size: 1em;
+    }
+    button {
+      background: #004aad;
+      color: white;
+      border: none;
+      border-radius: 5px;
+    }
+    button:hover {
+      background: #00337a;
+    }
+  </style>
+</head>
+<body>
+  <header>📋 Unit Office Admin Monitor</header>
+
+  <main>
+    <section>
+      <h2>Staff Records</h2>
+      <input type="text" id="staffName" placeholder="Staff Name">
+      <input type="text" id="staffRole" placeholder="Role/Position">
+      <button onclick="addStaff()">Add Staff</button>
+      <ul id="staffList"></ul>
+    </section>
+
+    <section>
+      <h2>Task Tracker</h2>
+      <input type="text" id="taskTitle" placeholder="Task Title">
+      <textarea id="taskDetails" placeholder="Task Details"></textarea>
+      <button onclick="addTask()">Add Task</button>
+      <ul id="taskList"></ul>
+    </section>
+
+    <section>
+      <h2>Admin Notes</h2>
+      <textarea id="noteText" placeholder="Write note here..."></textarea>
+      <button onclick="saveNote()">Save Note</button>
+      <div id="savedNotes"></div>
+    </section>
+  </main>
+
+  <script>
+    function addStaff() {
+      const name = document.getElementById('staffName').value;
+      const role = document.getElementById('staffRole').value;
+      if (name && role) {
+        const li = document.createElement('li');
+        li.textContent = `${name} — ${role}`;
+        document.getElementById('staffList').appendChild(li);
+        document.getElementById('staffName').value = '';
+        document.getElementById('staffRole').value = '';
+        saveData();
+      }
+    }
+
+    function addTask() {
+      const title = document.getElementById('taskTitle').value;
+      const details = document.getElementById('taskDetails').value;
+      if (title) {
+        const li = document.createElement('li');
+        li.textContent = `${title}: ${details}`;
+        document.getElementById('taskList').appendChild(li);
+        document.getElementById('taskTitle').value = '';
+        document.getElementById('taskDetails').value = '';
+        saveData();
+      }
+    }
+
+    function saveNote() {
+      const text = document.getElementById('noteText').value;
+      if (text) {
+        const p = document.createElement('p');
+        p.textContent = text;
+        document.getElementById('savedNotes').appendChild(p);
+        document.getElementById('noteText').value = '';
+        saveData();
+      }
+    }
+
+    function saveData() {
+      const data = {
+        staff: document.getElementById('staffList').innerHTML,
+        tasks: document.getElementById('taskList').innerHTML,
+        notes: document.getElementById('savedNotes').innerHTML
+      };
+      localStorage.setItem('unitAdminData', JSON.stringify(data));
+    }
+
+    function loadData() {
+      const saved = localStorage.getItem('unitAdminData');
+      if (saved) {
+        const data = JSON.parse(saved);
+        document.getElementById('staffList').innerHTML = data.staff;
+        document.getElementById('taskList').innerHTML = data.tasks;
+        document.getElementById('savedNotes').innerHTML = data.notes;
+      }
+    }
+
+    window.onload = loadData;
+  </script>
+</body>
+</html>
