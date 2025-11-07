@@ -81,6 +81,40 @@ textarea {
       object-fit: cover;
       border-radius: 5px;
     }
+    .tab-buttons {
+  display: flex;
+  justify-content: center;
+  gap: 5px;
+  margin-top: 10px;
+}
+.tab-btn {
+  background: #004aad;
+  color: white;
+  border: none;
+  padding: 6px 10px;
+  border-radius: 5px;
+  cursor: pointer;
+}
+.tab-btn.active {
+  background: #00337a;
+}
+.tab-content {
+  display: none;
+}
+.tab-content.active {
+  display: block;
+}
+#printFooter {
+  display: none;
+  margin-top: 40px;
+  font-size: 14px;
+}
+@media print {
+  .controls, .tab-buttons, button, input, select, textarea { display: none !important; }
+  #printFooter {
+    display: block;
+    text-align: left;
+    margin-top: 50px;
     @media print {
   .controls, button, input, select, textarea { display: none !important; }
   body { background: #fff; margin: 20px; }
@@ -105,56 +139,97 @@ textarea {
 </head>
 <body>
   <div class="container">
-    <h1>MSSU NCR-CL PERSONNEL STATUS</h1>
-    <div id="reportDate"></div>
-    <div class="controls">
-      <input type="text" id="itemNo" placeholder="Item #">
-      <input type="file" id="photoInput" accept="image/*">
-      <input type="text" id="name" placeholder="Name">
-      <input type="text" id="designation" placeholder="Designation">
-      <select id="status">
-        <option value="On Duty">On Duty</option>
-        <option value="Rest & Recreation Leave">Rest & Recreation Leave</option>
-        <option value="Mandatory Leave">Mandatory Leave</option>
-        <option value="Sick Leave">Sick Leave</option>
-        <option value="Official Business">Official Business</option>
-        <option value="Under Instruction">Under Instruction</option>
-        <option value="Schooling (Local)">Schooling (Local)</option>
-        <option value="Schooling (Foreign)">Schooling (Foreign)</option>
-        <option value="Training (Local)">Training (Local)</option>
-        <option value="Training (Foreign)">Training (Foreign)</option>
-      </select>
-      <input type="date" id="startDate">
-      <input type="date" id="endDate">
-      <textarea id="remarks" placeholder="Remarks / Authority"></textarea>
-      <select id="action">
-        <option value="Active DS">Active DS</option>
-        <option value="Organic">Organic</option>
-        <option value="Retired">Retired</option>
-        <option value="Transferred">Transferred to Other Unit</option>
-      </select>
-      <input type="file" id="soiFile" accept=".pdf,.doc,.docx">
-      <button id="addBtn">Add Personnel</button>
-      <button id="printBtn">🖨️ Print</button>
-    </div>
+   <h1>MSSU NCR-CL PERSONNEL STATUS</h1>
+<div id="reportDate"></div>
 
-    <table id="personnelTable">
-      <thead>
-        <tr>
-          <th>Item #</th>
-          <th>Photo</th>
-          <th>Name</th>
-          <th>Designation</th>
-          <th>Status</th>
-          <th>Duration</th>
-          <th>Remarks</th>
-          <th>Action</th>
-          <th>SOI</th>
-          <th>Edit/Delete</th>
-        </tr>
-      </thead>
-      <tbody></tbody>
-    </table>
+<!-- Tabs for 3 sections -->
+<div class="tab-buttons">
+  <button class="tab-btn active" data-tab="mssu">MSSU</button>
+  <button class="tab-btn" data-tab="ds">Detached Status (DS)</button>
+  <button class="tab-btn" data-tab="psc">PSC Division</button>
+</div>
+
+<!-- Control input area -->
+<div class="controls">
+  <input type="text" id="itemNo" placeholder="Item #">
+  <input type="file" id="photoInput" accept="image/*">
+  <input type="text" id="name" placeholder="Name">
+  <input type="text" id="designation" placeholder="Designation">
+  <select id="status">
+    <option value="On Duty">On Duty</option>
+    <option value="Rest & Recreation Leave">Rest & Recreation Leave</option>
+    <option value="Mandatory Leave">Mandatory Leave</option>
+    <option value="Sick Leave">Sick Leave</option>
+    <option value="Official Business">Official Business</option>
+    <option value="Under Instruction">Under Instruction</option>
+    <option value="Schooling (Local)">Schooling (Local)</option>
+    <option value="Schooling (Foreign)">Schooling (Foreign)</option>
+    <option value="Training (Local)">Training (Local)</option>
+    <option value="Training (Foreign)">Training (Foreign)</option>
+  </select>
+  <input type="date" id="startDate">
+  <input type="date" id="endDate">
+  <textarea id="remarks" placeholder="Remarks / Authority"></textarea>
+  <select id="action">
+    <option value="Active DS">Active DS</option>
+    <option value="Organic">Organic</option>
+    <option value="Retired">Retired</option>
+    <option value="Transferred">Transferred</option>
+    <option value="AWOL">AWOL</option>
+  </select>
+  <input type="file" id="soiFile" accept=".pdf,.doc,.docx">
+  <button id="addBtn">Add Personnel</button>
+  <button id="printBtn">🖨️ Print</button>
+</div>
+
+<!-- Tables per section -->
+<div id="mssu" class="tab-content active">
+  <h3>MSSU Personnel</h3>
+  <table id="mssuTable" class="personnelTable">
+    <thead>
+      <tr>
+        <th>Item #</th><th>Photo</th><th>Name</th><th>Designation</th>
+        <th>Status</th><th>Duration</th><th>Remarks</th><th>Action</th>
+        <th>SOI</th><th>Edit/Delete</th>
+      </tr>
+    </thead>
+    <tbody></tbody>
+  </table>
+</div>
+
+<div id="ds" class="tab-content">
+  <h3>Detached Status (DS)</h3>
+  <table id="dsTable" class="personnelTable">
+    <thead>
+      <tr>
+        <th>Item #</th><th>Photo</th><th>Name</th><th>Designation</th>
+        <th>Status</th><th>Duration</th><th>Remarks</th><th>Action</th>
+        <th>SOI</th><th>Edit/Delete</th>
+      </tr>
+    </thead>
+    <tbody></tbody>
+  </table>
+</div>
+
+<div id="psc" class="tab-content">
+  <h3>PSC Division (South Harbor / North Harbor / Bataan / Subic)</h3>
+  <table id="pscTable" class="personnelTable">
+    <thead>
+      <tr>
+        <th>Item #</th><th>Photo</th><th>Name</th><th>Designation</th>
+        <th>Status</th><th>Duration</th><th>Remarks</th><th>Action</th>
+        <th>SOI</th><th>Edit/Delete</th>
+      </tr>
+    </thead>
+    <tbody></tbody>
+  </table>
+</div>
+
+<!-- Footer for print -->
+<div id="printFooter">
+  <p><strong>Prepared by:</strong> _________________________</p>
+  <p><strong>Verified by:</strong> _________________________</p>
+  <p><strong>Approved by:</strong> _________________________</p>
   </div>
 
   <script>
@@ -176,7 +251,10 @@ textarea {
     };
 
     const tableBody = document.querySelector('#personnelTable tbody');
-    let records = JSON.parse(localStorage.getItem('personnelRecordsV2')) || [];
+    let records = {
+  mssu: JSON.parse(localStorage.getItem('mssuRecords')) || [],
+  ds: JSON.parse(localStorage.getItem('dsRecords')) || [],
+  psc: JSON.parse(localStorage.getItem('pscRecords')) || []
     displayRecords();
 
     document.getElementById('addBtn').addEventListener('click', () => {
@@ -203,7 +281,7 @@ textarea {
           soiFile: soiData,
           soiName: soiName
         };
-        records.push(newRecord);
+        records.active(newRecord);
         saveAndDisplay();
         clearInputs();
       };
@@ -231,48 +309,45 @@ textarea {
     });
 
     function displayRecords() {
-      tableBody.innerHTML = '';
-      records.forEach((rec, index) => {
-        const row = document.createElement('tr');
-        row.innerHTML = `
-          <td>${rec.itemNo || ''}</td>
-          <td>${rec.photo ? `<img src="${rec.photo}" alt="Photo">` : '—'}</td>
-          <td contenteditable="true" onblur="editField(${index}, 'name', this.textContent)">${rec.name}</td>
-          <td contenteditable="true" onblur="editField(${index}, 'designation', this.textContent)">${rec.designation}</td>
-          <td>
-            <select onchange="editField(${index}, 'status', this.value)">
-              ${["On Duty","Rest & Recreation Leave","Mandatory Leave","Sick Leave","Official Business","Under Instruction","Schooling (Local)","Schooling (Foreign)","Training (Local)","Training (Foreign)"]
-                .map(st => `<option ${rec.status === st ? 'selected':''}>${st}</option>`).join('')}
-            </select>
-          </td>
-          <td><input type="date" value="${rec.start}" onchange="editField(${index}, 'start', this.value)"> to 
-              <input type="date" value="${rec.end}" onchange="editField(${index}, 'end', this.value)"></td>
-          <td contenteditable="true" onblur="editField(${index}, 'remarks', this.textContent)">${rec.remarks || ''}</td>
-          <td>
-            <select onchange="editField(${index}, 'action', this.value)">
-              ${["Active DS","Organic","Retired","Transferred"].map(a => `<option ${rec.action===a?'selected':''}>${a}</option>`).join('')}
-            </select>
-          </td>
-          <td>${rec.soiFile ? `<a href="${rec.soiFile}" download="${rec.soiName}">📄 ${rec.soiName}</a>` : '—'}</td>
-          <td>
-            <button onclick="deleteRecord(${index})">❌</button>
-          </td>
-        `;
-        tableBody.appendChild(row);
-      });
-    }
+  ['mssu','ds','psc'].forEach(type => {
+    const tableBody = document.querySelector(`#${type}Table tbody`);
+    tableBody.innerHTML = '';
+    records[type].forEach((rec, index) => {
+      const row = document.createElement('tr');
+      row.innerHTML = `
+        <td>${rec.itemNo || ''}</td>
+        <td>${rec.photo ? `<img src="${rec.photo}" alt="Photo">` : '—'}</td>
+        <td contenteditable="true" onblur="editField('${type}',${index},'name',this.textContent)">${rec.name}</td>
+        <td contenteditable="true" onblur="editField('${type}',${index},'designation',this.textContent)">${rec.designation}</td>
+        <td><select onchange="editField('${type}',${index},'status',this.value)">
+          ${["On Duty","Rest & Recreation Leave","Mandatory Leave","Sick Leave","Official Business","Under Instruction","Schooling (Local)","Schooling (Foreign)","Training (Local)","Training (Foreign)"]
+          .map(st => `<option ${rec.status===st?'selected':''}>${st}</option>`).join('')}
+        </select></td>
+        <td><input type="date" value="${rec.start}" onchange="editField('${type}',${index},'start',this.value)"> to 
+        <input type="date" value="${rec.end}" onchange="editField('${type}',${index},'end',this.value)"></td>
+        <td contenteditable="true" onblur="editField('${type}',${index},'remarks',this.textContent)">${rec.remarks||''}</td>
+        <td><select onchange="editField('${type}',${index},'action',this.value)">
+          ${["Active DS","Organic","Retired","Transferred"].map(a=>`<option ${rec.action===a?'selected':''}>${a}</option>`).join('')}
+        </select></td>
+        <td>${rec.soiFile ? `<a href="${rec.soiFile}" download="${rec.soiName}">📄 ${rec.soiName}</a>` : '—'}</td>
+        <td><button onclick="deleteRecord('${type}',${index})">❌</button></td>
+      `;
+      tableBody.appendChild(row);
+    });
+  })
 
-    function editField(index, key, value) {
-      records[index][key] = value;
-      saveAndDisplay();
-    }
-
-    function deleteRecord(index) {
-      if (confirm('Delete this record?')) {
-        records.splice(index, 1);
-        saveAndDisplay();
-      }
-    }
+    function editField(type, index, key, value) {
+  records[type][index][key] = value;
+  localStorage.setItem(type + 'Records', JSON.stringify(records[type]));
+  displayRecords();
+}
+function deleteRecord(type, index) {
+  if (confirm('Delete this record?')) {
+    records[type].splice(index, 1);
+    localStorage.setItem(type + 'Records', JSON.stringify(records[type]));
+    displayRecords();
+  }
+}
 
     function clearInputs() {
       Object.values(fields).forEach(f => f.value = '');
@@ -284,6 +359,14 @@ textarea {
     }
 
     document.getElementById('printBtn').addEventListener('click', () => window.print());
+    // Tab switching logic
+document.querySelectorAll('.tab-btn').forEach(btn => {
+  btn.addEventListener('click', () => {
+    document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
+    document.querySelectorAll('.tab-content').forEach(tab => tab.classList.remove('active'));
+    btn.classList.add('active');
+    document.getElementById(btn.dataset.tab).classList.add('active');
+  });
   </script>
 </body>
 </html>
