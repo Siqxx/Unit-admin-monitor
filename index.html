@@ -4,6 +4,7 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>MSSU NCR-CL PERSONNEL STATUS</title>
+<button onclick="printReport()">🖨 Print Report</button>
 <style>
   body {
     font-family: Arial, sans-serif;
@@ -171,7 +172,7 @@
 
   <h2>Summary of All Personnel</h2>
   <div id="summaryBox"></div>
-
+<button id="sendDataBtn">📤 Send / Save Data</button>
 </main>
 
 <script>
@@ -266,6 +267,12 @@ function displayRecords(){
   const grand = records.mssu.length + records.ds.length + records.psc.length;
   document.getElementById('summaryBox').innerHTML =
     `<b>Total MSSU:</b> ${records.mssu.length} | <b>DS:</b> ${records.ds.length} | <b>PSC:</b> ${records.psc.length} | <b>Grand Total:</b> ${grand}`;
+}
+function printReport() {
+  const inputs = document.querySelectorAll('input, textarea, button');
+  inputs.forEach(i => i.style.display = 'none'); // hide input elements
+  window.print();
+  inputs.forEach(i => i.style.display = ''); // restore inputs after printing
 }
 </script>
 </body>
