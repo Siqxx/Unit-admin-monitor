@@ -15,13 +15,165 @@
     }
   </script>
   <style>
-    body {
-      font-family: system-ui, sans-serif;
-      margin: 0;
-      padding: 0;
-      background: #f5f6fa;
-      color: #333;
+    body {<body>
+  <div class="container">
+    <h1>Unit Personnel Status Monitor</h1>
+
+    <div class="controls">
+      <input type="text" id="name" placeholder="Personnel Name">
+      <input type="text" id="designation" placeholder="Designation">
+      <select id="status">
+        <option value="On Duty">On Duty</option>
+        <option value="Rest & Recreation Leave">Rest & Recreation Leave</option>
+        <option value="Mandatory Leave">Mandatory Leave</option>
+        <option value="Sick Leave">Sick Leave</option>
+        <option value="Official Business">Official Business</option>
+        <option value="Under Instruction">Under Instruction</option>
+        <option value="Schooling">Schooling</option>
+      </select>
+      <input type="date" id="dateReported">
+      <button id="addBtn">Add Personnel</button>
+      <button id="printBtn">🖨️ Print</button>
+    </div>
+
+    <table id="personnelTable">
+      <thead>
+        <tr>
+          <th>Name</th>
+          <th>Designation</th>
+          <th>Status</th>
+          <th>Date Reported</th>
+          <th>Actions</th>
+        </tr>
+      </thead>
+      <tbody></tbody>
+    </table>
+  </div>
+
+  <script>
+    const nameInput = document.getElementById('name');
+    const designationInput = document.getElementById('designation');
+    const statusInput = document.getElementById('status');
+    const dateInput = document.getElementById('dateReported');
+    const tableBody = document.querySelector('#personnelTable tbody');
+    const addBtn = document.getElementById('addBtn');
+    const printBtn = document.getElementById('printBtn');
+
+    // Load existing data
+    let records = JSON.parse(localStorage.getItem('personnelRecords')) || [];
+    displayRecords();
+
+    addBtn.addEventListener('click', () => {
+      if (!nameInput.value || !designationInput.value || !dateInput.value) {
+        alert('Please fill out all fields.');
+        return;
+      }
+
+      const record = {
+        name: nameInput.value,
+        designation: designationInput.value,
+        status: statusInput.value,
+        date: dateInput.value
+      };
+
+      records.push(record);
+      localStorage.setItem('personnelRecords', JSON.stringify(records));
+      displayRecords();
+
+      nameInput.value = '';
+      designationInput.value = '';
+      dateInput.value = '';
+    });
+
+    function displayRecords() {
+      tableBody.innerHTML = '';
+      records.forEach((rec, index) => {
+        const row = document.createElement('tr');
+        row.innerHTML = `
+          <td>${rec.name}</td>
+          <td>${rec.designation}</td>
+          <td>${rec.status}</td>
+          <td>${rec.date}</td>
+          <td><button onclick="deleteRecord(${index})">❌</button></td>
+        `;
+        tableBody.appendChild(row);
+      });
     }
+
+    function deleteRecord(index) {
+      if (confirm('Delete this record?')) {
+        records.splice(index, 1);
+        localStorage.setItem('personnelRecords', JSON.stringify(records));
+        displayRecords();
+      }
+    }
+
+    // Print function
+    printBtn.addEventListener('click', () => {
+      window.print();
+    });
+  </script>
+
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      margin: 20px;
+      background: #f4f7fa;
+    }
+    .container {
+      max-width: 900px;
+      margin: auto;
+      background: white;
+      padding: 20px;
+      border-radius: 10px;
+      box-shadow: 0 0 10px rgba(0,0,0,0.1);
+    }
+    h1 {
+      text-align: center;
+    }
+    .controls {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 10px;
+      margin-bottom: 15px;
+    }
+    input, select, button {
+      padding: 10px;
+      font-size: 14px;
+    }
+    button {
+      background: #007BFF;
+      color: white;
+      border: none;
+      border-radius: 5px;
+      cursor: pointer;
+    }
+    button:hover {
+      background: #0056b3;
+    }
+    table {
+      width: 100%;
+      border-collapse: collapse;
+    }
+    th, td {
+      border: 1px solid #ccc;
+      padding: 8px;
+      text-align: center;
+    }
+    th {
+      background: #007BFF;
+      color: white;
+    }
+    @media print {
+      button, .controls {
+        display: none;
+      }
+      h1 {
+        margin-bottom: 20px;
+      }
+    }
+  </style>
+</body>}
     header {
       background: #004aad;
       color: white;
@@ -89,63 +241,89 @@
   </main>
 
   <script>
-    function addStaff() {
-      const name = document.getElementById('staffName').value;
-      const role = document.getElementById('staffRole').value;
-      if (name && role) {
-        const li = document.createElement('li');
-        li.textContent = `${name} — ${role}`;
-        document.getElementById('staffList').appendChild(li);
-        document.getElementById('staffName').value = '';
-        document.getElementById('staffRole').value = '';
-        saveData();
-      }
+    const nameInput = document.getElementById('name');
+  const designationInput = document.getElementById('designation');
+  const statusInput = document.getElementById('status');
+  const dateInput = document.getElementById('dateReported');
+  const tableBody = document.querySelector('#personnelTable tbody');
+  const addBtn = document.getElementById('addBtn');
+  const printBtn = document.getElementById('printBtn');
+
+  // Create summary display area
+  const summaryDiv = document.createElement('div');
+  summaryDiv.id = 'summary';
+  summaryDiv.style.marginBottom = '15px';
+  document.querySelector('.container').insertBefore(summaryDiv, document.querySelector('.controls'));
+
+  // Load existing data
+  let records = JSON.parse(localStorage.getItem('personnelRecords')) || [];
+  displayRecords();
+
+  addBtn.addEventListener('click', () => {
+    if (!nameInput.value || !designationInput.value || !dateInput.value) {
+      alert('Please fill out all fields.');
+      return;
     }
 
-    function addTask() {
-      const title = document.getElementById('taskTitle').value;
-      const details = document.getElementById('taskDetails').value;
-      if (title) {
-        const li = document.createElement('li');
-        li.textContent = `${title}: ${details}`;
-        document.getElementById('taskList').appendChild(li);
-        document.getElementById('taskTitle').value = '';
-        document.getElementById('taskDetails').value = '';
-        saveData();
-      }
-    }
+    const record = {
+      name: nameInput.value,
+      designation: designationInput.value,
+      status: statusInput.value,
+      date: dateInput.value
+    };
 
-    function saveNote() {
-      const text = document.getElementById('noteText').value;
-      if (text) {
-        const p = document.createElement('p');
-        p.textContent = text;
-        document.getElementById('savedNotes').appendChild(p);
-        document.getElementById('noteText').value = '';
-        saveData();
-      }
-    }
+    records.push(record);
+    localStorage.setItem('personnelRecords', JSON.stringify(records));
+    displayRecords();
 
-    function saveData() {
-      const data = {
-        staff: document.getElementById('staffList').innerHTML,
-        tasks: document.getElementById('taskList').innerHTML,
-        notes: document.getElementById('savedNotes').innerHTML
-      };
-      localStorage.setItem('unitAdminData', JSON.stringify(data));
-    }
+    nameInput.value = '';
+    designationInput.value = '';
+    dateInput.value = '';
+  });
 
-    function loadData() {
-      const saved = localStorage.getItem('unitAdminData');
-      if (saved) {
-        const data = JSON.parse(saved);
-        document.getElementById('staffList').innerHTML = data.staff;
-        document.getElementById('taskList').innerHTML = data.tasks;
-        document.getElementById('savedNotes').innerHTML = data.notes;
-      }
-    }
+  function displayRecords() {
+    tableBody.innerHTML = '';
+    records.forEach((rec, index) => {
+      const row = document.createElement('tr');
+      row.innerHTML = `
+        <td>${rec.name}</td>
+        <td>${rec.designation}</td>
+        <td>${rec.status}</td>
+        <td>${rec.date}</td>
+        <td><button onclick="deleteRecord(${index})">❌</button></td>
+      `;
+      tableBody.appendChild(row);
+    });
 
-    window.onload = loadData;
+    updateSummary();
+  }
+
+  function deleteRecord(index) {
+    if (confirm('Delete this record?')) {
+      records.splice(index, 1);
+      localStorage.setItem('personnelRecords', JSON.stringify(records));
+      displayRecords();
+    }
+  }
+
+  // 🧮 Update the summary counts
+  function updateSummary() {
+    const counts = {};
+    records.forEach(rec => {
+      counts[rec.status] = (counts[rec.status] || 0) + 1;
+    });
+
+    const summaryText = Object.entries(counts)
+      .map(([status, count]) => `<strong>${status}</strong>: ${count}`)
+      .join(' &nbsp; | &nbsp; ');
+
+    summaryDiv.innerHTML = `<p><b>Personnel Summary:</b> ${summaryText || 'No records yet.'}</p>`;
+  }
+
+  // 🖨️ Print function
+  printBtn.addEventListener('click', () => {
+    window.print();
+  });
   </script>
 </body>
 </html>
