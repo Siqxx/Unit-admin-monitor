@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Unit Personnel Status Monitor</title>
+  <title>MSSU NCR-CL PERSONNEL STATUS</title>
   <style>
     body {
       font-family: Arial, sans-serif;
@@ -39,12 +39,16 @@
       margin-top: 20px;
     }
     input, select, button, textarea {
-      padding: 10px;
-      font-size: 14px;
-    }
-    input, select, textarea {
-      flex: 1;
-      min-width: 120px;
+  padding: 6px;
+  font-size: 13px;
+}
+input, select, textarea {
+  flex: 1;
+  min-width: 100px;
+  max-width: 140px;
+}
+textarea {
+  min-height: 30px;
     }
     textarea {
       min-height: 35px;
@@ -78,21 +82,31 @@
       border-radius: 5px;
     }
     @media print {
-      button, .controls { display: none; }
-      body { background: #fff; }
-      h1 {
-        color: black;
-        background: none;
-        border-bottom: 2px solid #004aad;
+  .controls, button, input, select, textarea { display: none !important; }
+  body { background: #fff; margin: 20px; }
+  h1 {
+    color: black;
+    background: none;
+    border-bottom: 2px solid #004aad;
+    padding-bottom: 5px;
+    margin-bottom: 10px;
+  }
+  #reportDate {
+    display: block;
+    text-align: right;
+    font-weight: bold;
+    margin-bottom: 10px;
+  }
+  table {
+    font-size: 13px;
       }
     }
   </style>
 </head>
 <body>
   <div class="container">
-    <h1>Unit Personnel Status Monitor</h1>
+    <h1>MSSU NCR-CL PERSONNEL STATUS</h1>
     <div id="reportDate"></div>
-
     <div class="controls">
       <input type="text" id="itemNo" placeholder="Item #">
       <input type="file" id="photoInput" accept="image/*">
